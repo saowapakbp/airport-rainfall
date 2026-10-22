@@ -61,7 +61,7 @@ const TEXT = {
     sub: "ปริมาณฝนสะสม 07:00 น. ถึง 07:00 น. ของวันถัดไป จาก AWOS ท่าอากาศยานและสถานีตรวจอากาศกรมอุตุนิยมวิทยา",
     issue: "วันที่ตรวจวัด",
     period: "ช่วงเวลา",
-    map: "แผนที่ฝนที่ตกจริง 24 ชั่วโมง",
+    map: "แผนที่ฝนที่ตกจริง 24 ชั่วโมง (AWOS + สถานีตรวจอากาศ กรมอุตุฯ)",
     list: "รายชื่อท่าอากาศยาน (ฝนที่ตกจริง AWOS)",
     miniTitle: "ฝนที่ตกจริงโดยรอบท่าอากาศยาน",
     strip: "ฝนที่ตกจริง 7 วันล่าสุด (AWOS)",
@@ -356,6 +356,10 @@ function renderHeader(data) {
   $("legend").hidden = radar;
   $("radar-legend").hidden = !radar;
   $("player").hidden = !radar;
+  $("map-note").hidden = state.mode !== "observed";
+  $("map-note").innerHTML = state.mode === "observed" && data
+    ? `สีพื้นประมาณค่าจาก AWOS ท่าอากาศยาน และสถานีตรวจอากาศกรมอุตุนิยมวิทยา ${data.stations.length} สถานี (<i class="dot"></i> ชี้เพื่อดูค่า) จึงอาจแสดงฝนหนักกว่าค่าที่ท่าอากาศยาน · ตัวเลขบนป้าย ในรายการ และการ์ดสรุปภาค เป็นค่า AWOS`
+    : "";
   document.querySelectorAll(".tabs button").forEach((b) => b.classList.toggle("on", b.dataset.mode === state.mode));
   updateDownload();
   updateSource();
