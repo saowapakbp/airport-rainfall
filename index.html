@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ฝนสะสม 24 ชั่วโมง รายท่าอากาศยาน</title>
+<meta name="description" content="พยากรณ์ปริมาณฝนสะสม 24 ชั่วโมง (07:00–07:00 น.) รายท่าอากาศยานทั่วประเทศ และปริมาณฝนที่ตกจริง กองอุตุนิยมวิทยาการบิน กรมอุตุนิยมวิทยา">
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-cloud" viewBox="0 0 48 40"><path d="M14 28a9 9 0 0 1-1-17.9A12 12 0 0 1 36 12a8 8 0 0 1 0 16z"/></symbol>
+  <symbol id="i-plane" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><path d="M7 3v3m10-3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="m20 20-4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.5" fill="currentColor"/></symbol>
+</svg>
+
+<header class="topbar">
+  <div class="org">
+    <img src="logo.png" alt="ตรากรมอุตุนิยมวิทยา" width="52" height="53">
+    <div>
+      <strong>กรมอุตุนิยมวิทยา</strong>
+      <span>กองอุตุนิยมวิทยาการบิน</span>
+      <small>AERONAUTICAL METEOROLOGY DIVISION</small>
+    </div>
+  </div>
+  <nav class="tabs" aria-label="ประเภทข้อมูล">
+    <button data-mode="forecast" class="on">พยากรณ์ฝน</button>
+    <button data-mode="radar" id="tab-radar" hidden><i class="live"></i>เรดาร์ล่าสุด</button>
+    <button data-mode="observed">ฝนที่ตกจริง (ย้อนหลัง)</button>
+  </nav>
+</header>
+
+<div class="hero-band"><section class="hero">
+  <div class="hero-text">
+    <h1 id="title">พยากรณ์ปริมาณฝนสะสม 24 ชั่วโมง รายท่าอากาศยาน</h1>
+    <p class="en" id="title-en">Airport 24-Hour Accumulated Rainfall Forecast</p>
+    <p class="sub" id="subtitle">ช่วง 07:00 น. ของวัน ถึง 07:00 น. ของวันถัดไป สำหรับสนับสนุนการปฏิบัติงานด้านการบิน</p>
+  </div>
+  <div class="issue card">
+    <div class="issue-row"><svg><use href="#i-cal"/></svg><div><span id="issue-label">วันที่ออกพยากรณ์</span><b id="issue-date">–</b></div></div>
+    <div class="issue-row"><svg><use href="#i-clock"/></svg><div><span id="period-label">ช่วงเวลา</span><b id="issue-period">–</b></div></div>
+    <div class="day-pick" id="day-pick"></div>
+    <a class="btn-primary" id="download" href="#" download hidden><svg><use href="#i-download"/></svg><span id="download-text">ดาวน์โหลดรายงาน (PNG)</span></a>
+    <a class="btn-source" id="source-link" href="#" target="_blank" rel="noopener" hidden><svg><use href="#i-ext"/></svg><span><small id="source-label">ดูผลผลิตต้นทาง</small><b id="source-name"></b></span></a>
+  </div>
+</section></div>
+
+<section class="region-strip" id="region-strip" aria-label="สรุปรายภาค"></section>
+
+<main class="board">
+  <section class="card map-card">
+    <div class="card-head">
+      <h2 id="map-title">แผนที่ฝนสะสม 24 ชั่วโมง</h2>
+      <span id="map-sub">ทั่วประเทศ</span>
+    </div>
+    <div class="map-box">
+      <div id="map" class="map"></div>
+      <div class="player" id="player" hidden>
+        <button id="play" aria-label="เล่น/หยุด">▶</button>
+        <input id="frame" type="range" min="0" max="0" value="0" aria-label="เลือกเวลาภาพเรดาร์">
+        <output id="frame-time">–</output>
+      </div>
+    </div>
+    <ul class="legend" id="legend" aria-label="เกณฑ์ปริมาณฝนสะสม 24 ชั่วโมง (มิลลิเมตร)"></ul>
+    <div class="radar-legend" id="radar-legend" hidden></div>
+  </section>
+
+  <section class="list-col">
+    <div class="filters card">
+      <label class="search"><svg><use href="#i-search"/></svg><input id="q" type="search" placeholder="ค้นหาท่าอากาศยาน หรือรหัส ICAO" autocomplete="off"></label>
+      <select id="sort" aria-label="เรียงลำดับ">
+        <option value="region">เรียงตามภาค</option>
+        <option value="rain">ฝนมากไปน้อย</option>
+        <option value="icao">ตามรหัส ICAO</option>
+      </select>
+    </div>
+    <div class="list-head">
+      <h2 id="list-title">รายชื่อท่าอากาศยาน</h2>
+      <div class="views">
+        <button data-view="cards" class="on">แบบการ์ด</button>
+        <button data-view="rows">แบบรายการ</button>
+      </div>
+    </div>
+    <div id="list" class="cards"></div>
+  </section>
+
+  <aside class="card detail" id="detail">
+    <div class="d-head">
+      <div class="d-badge"><svg><use href="#i-plane"/></svg></div>
+      <div>
+        <p class="d-code" id="d-code">–</p>
+        <h2 id="d-name">เลือกท่าอากาศยาน</h2>
+        <p class="d-region" id="d-region"></p>
+      </div>
+    </div>
+    <div class="d-value">
+      <div class="d-icon" id="d-icon"></div>
+      <div><b id="d-mm">–</b><span id="d-cat"></span></div>
+      <div class="d-chip" id="d-prob" hidden></div>
+    </div>
+    <p class="d-period" id="d-period"></p>
+    <h3 id="d-map-title">พื้นที่โดยรอบท่าอากาศยาน</h3>
+    <div id="mini" class="mini"></div>
+    <h3>ข้อมูลท่าอากาศยาน</h3>
+    <dl class="d-info">
+      <div><dt>รหัส ICAO</dt><dd id="i-icao">–</dd></div>
+      <div><dt>ละติจูด</dt><dd id="i-lat">–</dd></div>
+      <div><dt>ภาค</dt><dd id="i-region">–</dd></div>
+      <div><dt>ลองจิจูด</dt><dd id="i-lon">–</dd></div>
+    </dl>
+    <h3 id="d-strip-title"></h3>
+    <div class="d-strip" id="d-strip"></div>
+    <p class="d-note" id="d-note"></p>
+  </aside>
+</main>
+
+<footer class="foot">
+  <div><b>แหล่งข้อมูล</b><span id="foot-source"></span></div>
+  <div><b>หมายเหตุ</b><span>ผลพยากรณ์จากแบบจำลองสภาพอากาศเชิงตัวเลข ใช้ประกอบการติดตามและวางแผนด้านอุตุนิยมวิทยาการบิน กรุณาตรวจสอบข่าวอากาศล่าสุดประกอบก่อนนำไปใช้</span></div>
+  <div><b>ปรับปรุงล่าสุด</b><span id="foot-updated">–</span></div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
