@@ -28,19 +28,13 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 
 .card { background: var(--surface); border: 1px solid var(--hair); border-radius: 16px; box-shadow: var(--shadow); }
 
-.topbar {
-  display: flex; align-items: center; gap: 28px; padding: 10px 24px;
-  background: linear-gradient(100deg, #062a55 0%, #0b4f93 60%, #1270b8 100%); color: #fff;
+.tabs { max-width: 1640px; margin: 0 auto; padding: 16px 24px 0; display: flex; gap: 6px; }
+.tabs button {
+  border: 1px solid var(--hair); background: #fff; color: var(--ink-soft); padding: 8px 18px; border-radius: 999px;
+  font-weight: 600; font-family: var(--font-display); box-shadow: 0 2px 6px -4px rgba(10, 44, 85, .4);
 }
-.org { display: flex; align-items: center; gap: 12px; }
-.org img { filter: drop-shadow(0 3px 6px rgba(0, 0, 0, .3)); }
-.org strong { display: block; font-family: var(--font-display); font-size: 18px; line-height: 1.2; }
-.org span { display: block; font-size: 13px; opacity: .92; }
-.org small { display: block; font-size: 9.5px; letter-spacing: .08em; opacity: .7; }
-.tabs { display: flex; gap: 6px; margin-left: auto; }
-.tabs button { border: 0; background: transparent; color: rgba(255, 255, 255, .82); padding: 9px 18px; border-radius: 10px; font-weight: 600; font-family: var(--font-display); }
-.tabs button:hover { background: rgba(255, 255, 255, .1); color: #fff; }
-.tabs button.on { background: rgba(255, 255, 255, .18); color: #fff; box-shadow: inset 0 -3px 0 #7cc4f5; }
+.tabs button:hover { border-color: #b6cde3; color: var(--ink); }
+.tabs button.on { background: var(--brand-deep); border-color: var(--brand-deep); color: #fff; }
 
 .hero {
   display: flex; align-items: center; gap: 20px 28px; padding: 16px 24px 14px; max-width: 1640px; margin: 0 auto; flex-wrap: wrap;
@@ -192,8 +186,7 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
   .detail > * { grid-column: span 2; }
 }
 @media (max-width: 860px) {
-  .topbar { flex-wrap: wrap; gap: 10px; padding: 10px 16px; }
-  .tabs { margin-left: 0; width: 100%; }
+  .tabs { padding: 12px 16px 0; }
   .tabs button { flex: 1; padding: 8px 6px; font-size: 13px; }
   .hero { flex-direction: column; align-items: stretch; padding: 18px 16px 14px; }
   .issue { width: auto; }
