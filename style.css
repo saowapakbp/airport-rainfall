@@ -30,11 +30,14 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 
 .tabs { max-width: 1640px; margin: 0 auto; padding: 16px 24px 0; display: flex; gap: 6px; }
 .tabs button {
-  border: 1px solid var(--hair); background: #fff; color: var(--ink-soft); padding: 8px 18px; border-radius: 999px;
-  font-weight: 600; font-family: var(--font-display); box-shadow: 0 2px 6px -4px rgba(10, 44, 85, .4);
+  --t: #0d5ca8; --t2: #1ea0e6; --tint: #e1effc; --edge: #a9cdee;
+  border: 1.5px solid var(--edge); background: var(--tint); color: var(--t); padding: 9px 22px; border-radius: 999px;
+  font-weight: 700; font-family: var(--font-display); font-size: 14.5px; transition: transform .12s, box-shadow .12s;
 }
-.tabs button:hover { border-color: #b6cde3; color: var(--ink); }
-.tabs button.on { background: var(--brand-deep); border-color: var(--brand-deep); color: #fff; }
+.tabs button[data-mode="observed"] { --t: #0b7a5c; --t2: #19b389; --tint: #dff5ec; --edge: #9fd8c3; }
+.tabs button[data-mode="radar"] { --t: #c2410c; --t2: #f08a1a; --tint: #fdeedd; --edge: #f2c08f; }
+.tabs button:hover { transform: translateY(-1px); box-shadow: 0 8px 16px -10px var(--t); }
+.tabs button.on { background: linear-gradient(135deg, var(--t), var(--t2)); border-color: var(--t); color: #fff; box-shadow: 0 10px 20px -10px var(--t); }
 
 .hero {
   display: flex; align-items: center; gap: 20px 28px; padding: 16px 24px 14px; max-width: 1640px; margin: 0 auto; flex-wrap: wrap;
