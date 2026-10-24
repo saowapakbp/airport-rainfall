@@ -30,6 +30,7 @@ const MONTHS = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค."
 const MONTHS_LONG = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
 const WEEKDAYS = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."];
 const THAILAND = [[5.6, 97.3], [20.5, 105.7]];
+const MASK_COLOR = "#eef4fa";
 const STRIP_DAYS = 7;
 const MINI_ZOOM = 9;
 const NO_VALUE = ["missing", "fault"];
@@ -137,11 +138,13 @@ function overlayUrl(data) {
   return state.mode === "forecast" ? `data/forecast/day${state.dayIndex}.png?v=${state.latest.issued}` : `data/${data.date}/observed.png`;
 }
 
-function makeMap(id, options) {
+// thaiOnly hides everything outside Thailand (neighbouring countries and sea) with a mask drawn above the tiles
+function makeMap(id, options, thaiOnly = false) {
   const map = L.map(id, { zoomSnap: 0.25, minZoom: 4.5, maxZoom: 12, ...options });
   map.createPane("rain").style.zIndex = 350;
   map.createPane("borders").style.zIndex = 380;
   map.createPane("labels").style.zIndex = 390;
+  map.createPane("mask").style.zIndex = 395;
   map.getPane("labels").style.pointerEvents = "none";
   const attribution = 'Tiles &copy; <a href="https://www.esri.com">Esri</a> · กรมอุตุนิยมวิทยา · ECMWF';
   L.tileLayer(`${ESRI}/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`, { attribution, maxNativeZoom: 16 }).addTo(map);
@@ -149,6 +152,10 @@ function makeMap(id, options) {
   const line = (color, weight) => ({ pane: "borders", interactive: false, style: { color, weight, opacity: 0.75, fill: false } });
   load("provinces.geojson").then((geo) => geo && L.geoJSON(geo, line("#8aa1b8", 0.6)).addTo(map));
   load("thailand.geojson").then((geo) => geo && L.geoJSON(geo, line("#4b6685", 1.2)).addTo(map));
+  thaiOnly && Promise.all([load("thailand_mask.geojson"), load("thailand.geojson")]).then(([mask, border]) => {
+    mask && L.geoJSON(mask, { pane: "mask", interactive: false, style: { stroke: false, fillColor: MASK_COLOR, fillOpacity: 1 } }).addTo(map);
+    border && L.geoJSON(border, { pane: "mask", interactive: false, style: { color: "#4b6685", weight: 1.4, opacity: 0.9, fill: false } }).addTo(map);
+  });
   return { map, overlay: null, marks: L.layerGroup().addTo(map) };
 }
 
@@ -235,7 +242,7 @@ function renderRegions(data) {
   strip.innerHTML = groups.map(([key, name, airports]) => {
     const s = regionSummary(data, airports);
     const max = s.top ? s.top.r.mm : null;
-    const meta = `≥10 มม. <em>${s.wet}</em> จาก ${s.total} แห่ง`;
+    const meta = `ท่าอากาศยานที่ ≥10 มม. <em>${s.wet}</em> แห่ง`;
     return `<button class="rg ${state.region === key ? "on" : ""}" data-region="${key}" style="--c:${cssColor(max)}">`
       + `<span class="rg-name">${name}</span><span class="rg-max"><b>${fmt(max)}</b><small>มม. ${s.top ? s.top.a.icao : ""}</small></span>`
       + `<span class="rg-meta">${meta}</span></button>`;
@@ -517,7 +524,7 @@ async function init() {
   state.mode = allowed ? hashMode : latest ? "forecast" : "observed";
   $("tab-radar").hidden = !RADAR_ENABLED;
   state.obsDate = state.obsDates.includes(hashDate) ? hashDate : state.obsDates[state.obsDates.length - 1] || null;
-  state.mainMap = makeMap("map", { zoomControl: true });
+  state.mainMap = makeMap("map", { zoomControl: true }, true);
   state.mainMap.map.fitBounds(THAILAND);
   state.miniMap = makeMap("mini", { zoomControl: false, attributionControl: false, scrollWheelZoom: false });
   buildLegends();
